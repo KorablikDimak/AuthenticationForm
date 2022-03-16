@@ -5,7 +5,7 @@ namespace AuthenticationEmbedder.DataBaseRequest
 {
     public interface IDatabaseRequest
     {
-        public DataContext Context { init; }
+        public DataContext Context { get; init; }
         
         Task<bool> AddAuthModelAsync(AuthModel authModel);
         Task<AuthModel> FindAuthModelAsync(string token);
