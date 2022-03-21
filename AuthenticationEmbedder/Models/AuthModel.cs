@@ -1,11 +1,14 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+
 namespace AuthenticationEmbedder.Models
 {
     public class AuthModel
     {
         public int Id { get; set; }
-        public string Email { get; set; }
-        public string Token { get; set; }
-        public string ResponseAddress { get; set; }
-        public bool IsConfirmed { get; set; }
+        [Required] public string Email { get; set; }
+        [Required] public string Token { get; set; }
+        [Required] public string ResponseAddress { get; set; }
+        [Required] public DateTime DateTime { get; set; }
     }
 }

@@ -1,20 +1,23 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using AuthenticationEmbedder.Authentication;
 using AuthenticationEmbedder.DataBaseRequest;
 using AuthenticationEmbedder.Models;
 using InfoLog;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
+using Newtonsoft.Json;
 
 namespace AuthenticationEmbedder.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class EmailSenderController : Controller
@@ -32,6 +35,7 @@ namespace AuthenticationEmbedder.Controllers
             Logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpGet("GetJwtToken")]
         public async Task<ActionResult<string>> GetJwtToken(
             [FromHeader(Name = "site")] string siteName,
@@ -68,11 +72,12 @@ namespace AuthenticationEmbedder.Controllers
                 Email = email,
                 Token = Guid.NewGuid().ToString(),
                 ResponseAddress = responseAddress,
-                IsConfirmed = false
+                DateTime = DateTime.Now
             };
             
             if (!await DatabaseRequest.AddAuthModelAsync(authModel)) return new ConflictResult();
             if (!await SendEmailAsync(authModel)) return new ConflictResult();
+
             return Ok();
         }
 
@@ -106,19 +111,31 @@ namespace AuthenticationEmbedder.Controllers
             return true;
         }
 
+        [AllowAnonymous]
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token)
         {
             AuthModel authModel = await DatabaseRequest.FindAuthModelAsync(token);
             if (authModel == null) return new NotFoundResult();
-            authModel.IsConfirmed = true;
+
+            var responseModel = new ResponseModel
+            {
+                Email = authModel.Email,
+                IsConfirmed = false
+            };
+            if (!(DateTime.Now.Subtract(authModel.DateTime) > TimeSpan.FromMinutes(15))) responseModel.IsConfirmed = true;
+            if (!await DatabaseRequest.DeleteAuthModelAsync(authModel.Token)) return new ConflictResult();
 
             using (var client = new HttpClient())
             {
                 try
                 {
-                    await DatabaseRequest.DeleteAuthModelAsync(authModel.Token);
-                    await client.PostAsJsonAsync(new Uri(authModel.ResponseAddress), authModel);
+                    var json = JsonConvert.SerializeObject(responseModel);
+                    HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+                    var request = new HttpRequestMessage(HttpMethod.Post, authModel.ResponseAddress)
+                        { Content = content };
+                    var response = await client.SendAsync(request);
+                    if (!response.IsSuccessStatusCode) return new ConflictResult();
                 }
                 catch (Exception e)
                 {
