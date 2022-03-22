@@ -83,6 +83,7 @@ namespace AuthenticationEmbedder.Controllers
 
         private async Task<bool> SendEmailAsync(AuthModel authModel)
         {
+            if (!ModelState.IsValid) return false;
             var eMassage = new MimeMessage();
             
             eMassage.From.Add(new MailboxAddress("Confirm registration", "authenticationemailsender@gmail.com"));
@@ -118,7 +119,7 @@ namespace AuthenticationEmbedder.Controllers
             AuthModel authModel = await DatabaseRequest.FindAuthModelAsync(token);
             if (authModel == null) return new NotFoundResult();
 
-            var responseModel = new ResponseModel
+            var responseModel = new RegistrationRequest
             {
                 Email = authModel.Email,
                 IsConfirmed = false
