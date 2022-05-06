@@ -1,7 +1,7 @@
-![InfoLog](https://img.shields.io/badge/InfoLog-1.0.2-orange)
-![MailKit](https://img.shields.io/badge/MailKit-3.1.1-yellow)
-![Newtonsoft.Json](https://img.shields.io/badge/Newtonsoft.Json-13.0.1-orange)
-![Microsoft.EntityFrameworkCore](https://img.shields.io/badge/Microsoft.EntityFrameworkCore-6.0.0-informational)
+[![InfoLog](https://img.shields.io/badge/InfoLog-1.0.2-orange)](https://www.nuget.org/packages/InfoLog)
+[![MailKit](https://img.shields.io/badge/MailKit-3.1.1-yellow)](https://www.nuget.org/packages/MailKit)
+[![Newtonsoft.Json](https://img.shields.io/badge/Newtonsoft.Json-13.0.1-orange)](https://www.nuget.org/packages/Newtonsoft.Json)
+[![Microsoft.EntityFrameworkCore](https://img.shields.io/badge/Microsoft.EntityFrameworkCore-6.0.0-informational)](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore)
 
 # AuthenticationForm
 
