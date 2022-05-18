@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<logger>
+    <targets>
+        <target logsender="File" minlevel="Warning" filepath="{basedir}\logs\{shortdate}.log"
+                layout="{shortdate} | {longtime}:{millisecond} | {level} | {class} {method}() | line: {line} | {message}"/>
+        <target logsender="Database" minlevel="Error" connectionstring="Data Source=***;Initial Catalog=***;Persist Security Info=True;User ID=***;Password=***"
+                layout="{shortdate} | {longtime}:{millisecond} | {level} | {class} {method}() | line: {line} | {message}"
+                tablename="authlogs"/>
+    </targets>
+</logger>
