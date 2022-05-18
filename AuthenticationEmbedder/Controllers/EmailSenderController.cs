@@ -23,29 +23,27 @@ namespace AuthenticationEmbedder.Controllers
     public class EmailSenderController : Controller
     {
         private ILogger Logger { get; }
-        private IDatabaseRequest DatabaseRequest { get;  }
+        private IRepository Repository { get;  }
         private IJwtSigningEncodingKey JwtSigningEncodingKey { get; }
         
         public EmailSenderController(ILogger logger, 
-            IDatabaseRequest databaseRequest, 
+            IRepository repository, 
             IJwtSigningEncodingKey jwtSigningEncodingKey)
         {
             JwtSigningEncodingKey = jwtSigningEncodingKey;
-            DatabaseRequest = databaseRequest.CastToDatabaseRequestWithLogger(logger);
+            Repository = repository.CastToDatabaseRequestWithLogger(logger);
             Logger = logger;
         }
 
         [AllowAnonymous]
-        [HttpGet("GetJwtToken")]
-        public async Task<ActionResult<string>> GetJwtToken(
-            [FromHeader(Name = "site")] string siteName,
-            [FromHeader(Name = "password")] string password)
+        [HttpPost("GetJwtToken")]
+        public async Task<ActionResult<string>> GetJwtToken([FromBody] SiteLogin siteLogin)
         {
-            if (!await DatabaseRequest.CheckSiteAsync(siteName, password)) return new ForbidResult();
+            if (!await Repository.CheckSiteAsync(siteLogin)) return new ForbidResult();
             
             var claims = new Claim[]
             {
-                new Claim(ClaimTypes.NameIdentifier, siteName)
+                new Claim(ClaimTypes.NameIdentifier, siteLogin.SiteName)
             };
  
             var token = new JwtSecurityToken(
@@ -63,19 +61,17 @@ namespace AuthenticationEmbedder.Controllers
         }
 
         [HttpPost("SendEmail")]
-        public async Task<IActionResult> SendEmail(
-            [FromHeader(Name = "email")] string email, 
-            [FromHeader(Name = "responseaddress")] string responseAddress)
+        public async Task<IActionResult> SendEmail([FromBody] EmailRegistrationData emailRegistrationData)
         {
             AuthModel authModel = new AuthModel
             {
-                Email = email,
+                Email = emailRegistrationData.EmailName,
                 Token = Guid.NewGuid().ToString(),
-                ResponseAddress = responseAddress,
+                ResponseAddress = emailRegistrationData.ResponseAddress,
                 DateTime = DateTime.Now
             };
             
-            if (!await DatabaseRequest.AddAuthModelAsync(authModel)) return new ConflictResult();
+            if (!await Repository.AddAuthModelAsync(authModel)) return new ConflictResult();
             if (!await SendEmailAsync(authModel)) return new ConflictResult();
 
             return Ok();
@@ -99,7 +95,7 @@ namespace AuthenticationEmbedder.Controllers
             {
                 using var client = new SmtpClient();
                 await client.ConnectAsync("smtp.gmail.com", 465, true);
-                await client.AuthenticateAsync("authenticationemailsender@gmail.com", "*****");
+                await client.AuthenticateAsync("authenticationemailsender@gmail.com", "ZuTa7Xo7");
                 await client.SendAsync(eMassage);
                 await client.DisconnectAsync(true);
             }
@@ -116,7 +112,7 @@ namespace AuthenticationEmbedder.Controllers
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token)
         {
-            AuthModel authModel = await DatabaseRequest.FindAuthModelAsync(token);
+            AuthModel authModel = await Repository.FindAuthModelAsync(token);
             if (authModel == null) return new NotFoundResult();
 
             var responseModel = new RegistrationRequest
@@ -125,7 +121,7 @@ namespace AuthenticationEmbedder.Controllers
                 IsConfirmed = false
             };
             if (!(DateTime.Now.Subtract(authModel.DateTime) > TimeSpan.FromMinutes(15))) responseModel.IsConfirmed = true;
-            if (!await DatabaseRequest.DeleteAuthModelAsync(authModel.Token)) return new ConflictResult();
+            if (!await Repository.DeleteAuthModelAsync(authModel.Token)) return new ConflictResult();
 
             using (var client = new HttpClient())
             {

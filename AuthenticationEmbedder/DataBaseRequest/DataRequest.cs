@@ -1,16 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using AuthenticationEmbedder.Models;
-using InfoLog;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthenticationEmbedder.DataBaseRequest
 {
-    public class DatabaseRequestWithLogger : IHaveLogger, IDatabaseRequest
+    public class DataRequest : IRepository
     {
-        public ILogger Logger { get; set; }
         public DataContext Context { get; init; }
-
+        
         public async Task<bool> AddAuthModelAsync(AuthModel authModel)
         {
             try
@@ -21,9 +19,8 @@ namespace AuthenticationEmbedder.DataBaseRequest
                 await Context.AuthModels.AddAsync(authModel);
                 await Context.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                await Logger?.Error(e.ToString())!;
                 return false;
             }
 
@@ -46,26 +43,24 @@ namespace AuthenticationEmbedder.DataBaseRequest
                 Context.AuthModels.Remove(authModel);
                 await Context.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                await Logger?.Error(e.ToString())!;
                 return false;
             }
 
             return true;
         }
 
-        public async Task<bool> CheckSiteAsync(string siteName, string password)
+        public async Task<bool> CheckSiteAsync(SiteLogin siteLogin)
         {
             try
             {
-                LoginModel login = await Context.LoginModels.FirstOrDefaultAsync(data => 
-                    data.SiteName == siteName && data.Password == password);
-                if (login == null) return false;
+                SiteLogin siteLoginResult = await Context.LoginModels.FirstOrDefaultAsync(data => 
+                    data.SiteName == siteLogin.SiteName && data.Password == siteLogin.Password);
+                if (siteLoginResult == null) return false;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                await Logger?.Error(e.ToString())!;
                 return false;
             }
 

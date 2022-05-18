@@ -54,9 +54,9 @@ namespace AuthenticationEmbedder
         }
 
         public static void AddDataRequest<T>(this IServiceCollection services) 
-            where T : IDatabaseRequest, new ()
+            where T : IRepository, new ()
         {
-            services.AddScoped<IDatabaseRequest>(provider =>
+            services.AddScoped<IRepository>(provider =>
             {
                 DataContext dataContext = provider.GetService<DataContext>();
                 T databaseRequest = new T { Context = dataContext };

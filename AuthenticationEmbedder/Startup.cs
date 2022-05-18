@@ -23,7 +23,7 @@ namespace AuthenticationEmbedder
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogger<Logger>("..\\..\\..\\.nuget\\packages\\infolog\\1.0.2\\contentFiles\\any\\net5.0\\LogConfig.xml");
+            services.AddLogger<Logger>("LogConfig.xml");
             
             services.AddHsts(options =>
             {
@@ -34,11 +34,11 @@ namespace AuthenticationEmbedder
             
             services.AddCors();
             
-            services.AddJwtSigningAuthentication<SigningSymmetricKey>("we123qso43oa943ja443iaf439aj545ofo35");
+            services.AddJwtSigningAuthentication<SigningSymmetricKey>("we123qso33oa943ja443ia9h439aj55ofo35");
             
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
-            services.AddDataRequest<DatabaseRequest>();
+            services.AddDataRequest<DataRequest>();
             
             services.AddControllers();
             services.AddSwaggerGen(c =>

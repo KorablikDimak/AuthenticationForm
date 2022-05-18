@@ -4,20 +4,20 @@ namespace AuthenticationEmbedder.DataBaseRequest
 {
     public static class DataRequestExtensions
     {
-        public static DatabaseRequestWithLogger CastToDatabaseRequestWithLogger
-            (this IDatabaseRequest databaseRequest, ILogger logger = null)
+        public static DataRequestWithLogger CastToDatabaseRequestWithLogger
+            (this IRepository repository, ILogger logger = null)
         {
-            return new DatabaseRequestWithLogger
+            return new DataRequestWithLogger
             {
-                Context = databaseRequest.Context,
+                Context = repository.Context,
                 Logger = logger
             };
         }
 
-        public static DatabaseRequest CastToDatabaseRequest
-            (this IDatabaseRequest databaseRequest)
+        public static DataRequest CastToDatabaseRequest
+            (this IRepository repository)
         {
-            return new DatabaseRequest { Context = databaseRequest.Context };
+            return new DataRequest { Context = repository.Context };
         }
     }
 }

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthenticationEmbedder.Models
 {
-    public class LoginModel
+    public class SiteLogin
     {
         public int Id { get; set; }
         [Required] public string SiteName { get; set; }
