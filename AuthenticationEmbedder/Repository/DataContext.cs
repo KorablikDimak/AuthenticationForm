@@ -1,7 +1,7 @@
 using AuthenticationEmbedder.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthenticationEmbedder.DataBaseRequest
+namespace AuthenticationEmbedder.Repository
 {
     public sealed class DataContext : DbContext
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using AuthenticationEmbedder.Authentication;
-using AuthenticationEmbedder.DataBaseRequest;
+using AuthenticationEmbedder.Repository;
 using InfoLog;
 using InfoLog.Config;
 using Microsoft.Extensions.DependencyInjection;

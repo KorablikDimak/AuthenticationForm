@@ -1,6 +1,6 @@
 using System;
 using AuthenticationEmbedder.Authentication;
-using AuthenticationEmbedder.DataBaseRequest;
+using AuthenticationEmbedder.Repository;
 using InfoLog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +38,7 @@ namespace AuthenticationEmbedder
             
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
-            services.AddDataRequest<DataRequest>();
+            services.AddDataRequest<EntityRepository>();
             
             services.AddControllers();
             services.AddSwaggerGen(c =>

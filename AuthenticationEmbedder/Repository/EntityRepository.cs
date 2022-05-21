@@ -1,14 +1,16 @@
 using System;
 using System.Threading.Tasks;
 using AuthenticationEmbedder.Models;
+using InfoLog;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthenticationEmbedder.DataBaseRequest
+namespace AuthenticationEmbedder.Repository
 {
-    public class DataRequest : IRepository
+    public class EntityRepository : IRepository
     {
+        public ILogger Logger { get; set; }
         public DataContext Context { get; init; }
-        
+
         public async Task<bool> AddAuthModelAsync(AuthModel authModel)
         {
             try
@@ -19,8 +21,9 @@ namespace AuthenticationEmbedder.DataBaseRequest
                 await Context.AuthModels.AddAsync(authModel);
                 await Context.SaveChangesAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                await Logger?.Error(e.ToString())!;
                 return false;
             }
 
@@ -43,8 +46,9 @@ namespace AuthenticationEmbedder.DataBaseRequest
                 Context.AuthModels.Remove(authModel);
                 await Context.SaveChangesAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                await Logger?.Error(e.ToString())!;
                 return false;
             }
 
@@ -59,8 +63,9 @@ namespace AuthenticationEmbedder.DataBaseRequest
                     data.SiteName == siteLogin.SiteName && data.Password == siteLogin.Password);
                 if (siteLoginResult == null) return false;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                await Logger?.Error(e.ToString())!;
                 return false;
             }
 

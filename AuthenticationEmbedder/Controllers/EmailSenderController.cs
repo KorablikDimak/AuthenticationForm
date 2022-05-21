@@ -5,8 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AuthenticationEmbedder.Authentication;
-using AuthenticationEmbedder.DataBaseRequest;
 using AuthenticationEmbedder.Models;
+using AuthenticationEmbedder.Repository;
 using InfoLog;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
@@ -30,9 +30,10 @@ namespace AuthenticationEmbedder.Controllers
             IRepository repository, 
             IJwtSigningEncodingKey jwtSigningEncodingKey)
         {
-            JwtSigningEncodingKey = jwtSigningEncodingKey;
-            Repository = repository.CastToDatabaseRequestWithLogger(logger);
             Logger = logger;
+            Repository = repository;
+            Repository.Logger = Logger;
+            JwtSigningEncodingKey = jwtSigningEncodingKey;
         }
 
         [AllowAnonymous]
