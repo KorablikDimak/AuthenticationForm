@@ -11,11 +11,11 @@ public class EntityRepository : IRepository
     public ILogger Logger { get; set; }
     public DataContext Context { get; init; }
 
-    public async Task<bool> CreateEmailModel(EmailModel emailModel)
+    public async Task<bool> CreateEmailModelAsync(EmailModel emailModel)
     {
         try
         {
-            EmailModel email = await GetAuthModel(emailModel.Token);
+            EmailModel email = await GetEmailModelAsync(emailModel.Token);
             if (email != null) return false;
 
             await Context.EmailModels.AddAsync(emailModel);
@@ -30,17 +30,17 @@ public class EntityRepository : IRepository
         return true;
     }
 
-    public async Task<EmailModel> GetAuthModel(string token)
+    public async Task<EmailModel> GetEmailModelAsync(string token)
     {
         EmailModel emailModel = await Context.EmailModels.FirstOrDefaultAsync(data => data.Token == token);
         return emailModel;
     }
 
-    public async Task<bool> DeleteAuthModel(string token)
+    public async Task<bool> DeleteEmailModelAsync(string token)
     {
         try
         {
-            EmailModel emailModel = await GetAuthModel(token);
+            EmailModel emailModel = await GetEmailModelAsync(token);
             if (emailModel == null) return false;
             
             Context.EmailModels.Remove(emailModel);
@@ -55,7 +55,7 @@ public class EntityRepository : IRepository
         return true;
     }
 
-    public async Task<bool> ValidateSiteLogin(SiteLogin siteLogin)
+    public async Task<bool> ValidateSiteLoginAsync(SiteLogin siteLogin)
     {
         try
         {

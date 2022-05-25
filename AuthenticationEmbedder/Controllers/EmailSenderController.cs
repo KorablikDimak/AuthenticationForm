@@ -40,7 +40,7 @@ public class EmailSenderController : Controller
     [HttpPost("GetJwtToken")]
     public async Task<ActionResult<string>> GetJwtToken([FromBody] SiteLogin siteLogin)
     {
-        if (!await Repository.ValidateSiteLogin(siteLogin)) return new ForbidResult();
+        if (!await Repository.ValidateSiteLoginAsync(siteLogin)) return new ForbidResult();
             
         var claims = new Claim[]
         {
@@ -67,7 +67,7 @@ public class EmailSenderController : Controller
         EmailModel emailModel = CreateEmailModel(emailRequest);
         MimeMessage mimeMessage = await CreateMimeMessage(emailModel);
             
-        if (!await Repository.CreateEmailModel(emailModel)) return new ConflictResult();
+        if (!await Repository.CreateEmailModelAsync(emailModel)) return new ConflictResult();
         if (!await SendMimeMessage(mimeMessage)) return new ConflictResult();
 
         return Ok();
@@ -108,7 +108,7 @@ public class EmailSenderController : Controller
         {
             using var client = new SmtpClient();
             await client.ConnectAsync("smtp.gmail.com", 465, true);
-            await client.AuthenticateAsync("youremail", "tourpassword");
+            await client.AuthenticateAsync("youremail", "yourpassword");
             await client.SendAsync(eMassage);
             await client.DisconnectAsync(true);
         }
@@ -125,7 +125,7 @@ public class EmailSenderController : Controller
     [HttpGet("ConfirmEmail")]
     public async Task<IActionResult> ConfirmEmail(string token)
     {
-        EmailModel emailModel = await Repository.GetAuthModel(token);
+        EmailModel emailModel = await Repository.GetEmailModelAsync(token);
         if (emailModel == null) return new NotFoundResult();
 
         var responseModel = new EmailResponse
@@ -134,7 +134,7 @@ public class EmailSenderController : Controller
             IsConfirmed = false
         };
         if (!(DateTime.Now.Subtract(emailModel.DateTime) > TimeSpan.FromMinutes(15))) responseModel.IsConfirmed = true;
-        if (!await Repository.DeleteAuthModel(emailModel.Token)) return new ConflictResult();
+        if (!await Repository.DeleteEmailModelAsync(emailModel.Token)) return new ConflictResult();
 
         using (var client = new HttpClient())
         {
