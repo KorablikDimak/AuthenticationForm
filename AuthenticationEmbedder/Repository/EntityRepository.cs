@@ -4,72 +4,71 @@ using AuthenticationEmbedder.Models;
 using InfoLog;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthenticationEmbedder.Repository
+namespace AuthenticationEmbedder.Repository;
+
+public class EntityRepository : IRepository
 {
-    public class EntityRepository : IRepository
+    public ILogger Logger { get; set; }
+    public DataContext Context { get; init; }
+
+    public async Task<bool> CreateEmailModel(EmailModel emailModel)
     {
-        public ILogger Logger { get; set; }
-        public DataContext Context { get; init; }
-
-        public async Task<bool> AddAuthModelAsync(AuthModel authModel)
+        try
         {
-            try
-            {
-                AuthModel auth = await FindAuthModelAsync(authModel.Token);
-                if (auth != null) return false;
+            EmailModel email = await GetAuthModel(emailModel.Token);
+            if (email != null) return false;
 
-                await Context.AuthModels.AddAsync(authModel);
-                await Context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                await Logger?.Error(e.ToString())!;
-                return false;
-            }
-
-            return true;
+            await Context.EmailModels.AddAsync(emailModel);
+            await Context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            await Logger?.Error(e.ToString())!;
+            return false;
         }
 
-        public async Task<AuthModel> FindAuthModelAsync(string token)
-        {
-            AuthModel authModel = await Context.AuthModels.FirstOrDefaultAsync(data => data.Token == token);
-            return authModel;
-        }
+        return true;
+    }
 
-        public async Task<bool> DeleteAuthModelAsync(string token)
+    public async Task<EmailModel> GetAuthModel(string token)
+    {
+        EmailModel emailModel = await Context.EmailModels.FirstOrDefaultAsync(data => data.Token == token);
+        return emailModel;
+    }
+
+    public async Task<bool> DeleteAuthModel(string token)
+    {
+        try
         {
-            try
-            {
-                AuthModel authModel = await FindAuthModelAsync(token);
-                if (authModel == null) return false;
+            EmailModel emailModel = await GetAuthModel(token);
+            if (emailModel == null) return false;
             
-                Context.AuthModels.Remove(authModel);
-                await Context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                await Logger?.Error(e.ToString())!;
-                return false;
-            }
-
-            return true;
+            Context.EmailModels.Remove(emailModel);
+            await Context.SaveChangesAsync();
         }
-
-        public async Task<bool> CheckSiteAsync(SiteLogin siteLogin)
+        catch (Exception e)
         {
-            try
-            {
-                SiteLogin siteLoginResult = await Context.LoginModels.FirstOrDefaultAsync(data => 
-                    data.SiteName == siteLogin.SiteName && data.Password == siteLogin.Password);
-                if (siteLoginResult == null) return false;
-            }
-            catch (Exception e)
-            {
-                await Logger?.Error(e.ToString())!;
-                return false;
-            }
-
-            return true;
+            await Logger?.Error(e.ToString())!;
+            return false;
         }
+
+        return true;
+    }
+
+    public async Task<bool> ValidateSiteLogin(SiteLogin siteLogin)
+    {
+        try
+        {
+            SiteLogin siteLoginResult = await Context.LoginModels.FirstOrDefaultAsync(data => 
+                data.SiteName == siteLogin.SiteName && data.Password == siteLogin.Password);
+            if (siteLoginResult == null) return false;
+        }
+        catch (Exception e)
+        {
+            await Logger?.Error(e.ToString())!;
+            return false;
+        }
+
+        return true;
     }
 }

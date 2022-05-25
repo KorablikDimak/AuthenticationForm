@@ -1,9 +1,8 @@
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthenticationEmbedder.Authentication
+namespace AuthenticationEmbedder.Authentication;
+
+public interface IJwtSigningDecodingKey
 {
-    public interface IJwtSigningDecodingKey
-    {
-        SecurityKey GetKey();
-    }
+    SecurityKey GetKey();
 }

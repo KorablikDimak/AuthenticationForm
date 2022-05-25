@@ -1,12 +1,11 @@
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthenticationEmbedder.Authentication
+namespace AuthenticationEmbedder.Authentication;
+
+public interface IJwtSigningEncodingKey
 {
-    public interface IJwtSigningEncodingKey
-    {
-        string SigningAlgorithm { get; }
-        SymmetricSecurityKey SecretKey { init; }
+    string SigningAlgorithm { get; }
+    SymmetricSecurityKey SecretKey { init; }
  
-        SecurityKey GetKey();
-    }
+    SecurityKey GetKey();
 }
